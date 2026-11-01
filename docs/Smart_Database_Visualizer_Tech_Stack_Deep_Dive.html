@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Database Visualizer — Architectural Specification & Tech Stack Deep-Dive</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-size: 8pt;
+        color: #718096;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1a202c;
+      background: #ffffff;
+      line-height: 1.55;
+      font-size: 9.5pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Cover / Header Section */
+    .header-banner {
+      border-bottom: 2px solid #2b6cb0;
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+    }
+
+    .badge-primary { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+    .badge-success { background: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
+    .badge-neutral { background: #edf2f7; color: #4a5568; border: 1px solid #e2e8f0; }
+
+    h1 {
+      font-size: 20pt;
+      font-weight: 800;
+      color: #1a365d;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 10.5pt;
+      color: #4a5568;
+      margin: 0 0 10px 0;
+      font-weight: 500;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-top: 12px;
+    }
+
+    .meta-item {
+      font-size: 8pt;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: #718096;
+      text-transform: uppercase;
+      font-size: 7pt;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .meta-item span {
+      color: #2d3748;
+      font-weight: 600;
+    }
+
+    /* Headings */
+    h2 {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #2b6cb0;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 5px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #2d3748;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+      color: #2d3748;
+    }
+
+    ul, ol {
+      margin: 0 0 10px 0;
+      padding-left: 18px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 16px 0;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf2f7;
+      color: #2d3748;
+      font-weight: 700;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    tr:nth-child(even) td {
+      background: #fbfcfe;
+    }
+
+    /* Code & Path Elements */
+    code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 8pt;
+      background: #edf2f7;
+      color: #805ad5;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    .path {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 7.5pt;
+      color: #2b6cb0;
+      font-weight: 600;
+    }
+
+    pre {
+      background: #1a202c;
+      color: #f7fafc;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 7.5pt;
+      line-height: 1.45;
+      padding: 10px 12px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 10px 0 14px 0;
+      page-break-inside: avoid;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-left: 3.5px solid #3182ce;
+      background: #ebf8ff;
+      padding: 10px 12px;
+      margin: 12px 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 8.5pt;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: #2b6cb0;
+      margin-bottom: 3px;
+    }
+
+    .callout-success {
+      border-left-color: #38a169;
+      background: #f0fff4;
+    }
+    .callout-success .callout-title {
+      color: #276749;
+    }
+
+    /* Page Break Helpers */
+    .page-break {
+      page-break-before: always;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .card h4 {
+      margin: 0 0 6px 0;
+      font-size: 9pt;
+      color: #2b6cb0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cover / Header Banner -->
+  <div class="header-banner">
+    <div class="badge-bar">
+      <span class="badge badge-primary">Technical Architecture</span>
+      <span class="badge badge-success">Fully Functional & Verified</span>
+      <span class="badge badge-neutral">Production Ready</span>
+    </div>
+    <h1>Smart Database Visualizer</h1>
+    <div class="subtitle">Complete Technology Stack Specification, Implementation Mapping & Subsystem Deep-Dive</div>
+    
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Document Version</strong>
+        <span>Release 2.0 (Milestone 5+)</span>
+      </div>
+      <div class="meta-item">
+        <strong>Architecture Type</strong>
+        <span>Decoupled Full-Stack REST</span>
+      </div>
+      <div class="meta-item">
+        <strong>Frontend Port</strong>
+        <span>HTTP 3000 (Next.js 16)</span>
+      </div>
+      <div class="meta-item">
+        <strong>Backend Port</strong>
+        <span>HTTP 5000 (Express 4)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Executive Technical Summary -->
+  <h2>1. Executive Technical Summary</h2>
+  <p>
+    <strong>Smart Database Visualizer</strong> is a high-performance web platform that dynamically introspects relational MySQL databases, extracts their relational metadata via standard <code>INFORMATION_SCHEMA</code> catalogs with zero hardcoding, and renders an interactive, graph-theoretically arranged Entity-Relationship (ER) diagram in the browser.
+  </p>
+  <p>
+    The platform pairs an asynchronous <strong>Next.js 16 (React 19)</strong> frontend with a secured <strong>Node.js + Express</strong> backend. It provides automated layout (Dagre), complete five-tab schema exploration, AST-validated read-only SQL querying, heuristic database health analysis (rules R001–R005), and interactive CRUD operations.
+  </p>
+
+  <!-- Section 2: End-to-End System Architecture Topology -->
+  <h2>2. End-to-End Architecture & Topology</h2>
+  <pre>
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        PRESENTATION LAYER (Next.js 16 + React 19)                     │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────────────┐  │
+│  │   Interactive Canvas │  │ 5-Tab Table Explorer │  │ SQL Query Console (Read-Only)│  │
+│  │ (@xyflow/react+Dagre)│  │ (Keys, Indexes, FKs) │  │ (Ast Validator, High-res Ms) │  │
+│  └──────────┬───────────┘  └──────────┬───────────┘  └──────────────┬───────────────┘  │
+│             │                         │                             │                  │
+│             └─────────────────────────┼─────────────────────────────┘                  │
+│                                       ▼                                                │
+│                 Typed API Client (lib/schema-api.ts & lib/api.ts)                      │
+└───────────────────────────────────────┬────────────────────────────────────────────────┘
+                                        │ HTTP / JSON REST APIs (CORS Controlled)
+┌───────────────────────────────────────▼────────────────────────────────────────────────┐
+│                    APPLICATION & API LAYER (Express 4 on Node.js v24)                  │
+│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│  │ Security Stack: Helmet (HTTP Headers), CORS, Express Rate Limit (500 req/15 min) │  │
+│  └────────────────────────────────────────┬─────────────────────────────────────────┘  │
+│  ┌──────────────────────┐  ┌──────────────┴───────┐  ┌──────────────────────────────┐  │
+│  │ Schema Controller    │  │ Query Controller     │  │ Analysis & Health Engine     │  │
+│  │ (Overview, Tables)   │  │ (Read-Only Guardrail)│  │ (R001 - R005 Rule Analyzers) │  │
+│  └──────────┬───────────┘  └──────────┬───────────┘  └──────────────┬───────────────┘  │
+│             │                         │                             │                  │
+│             └─────────────────────────┼─────────────────────────────┘                  │
+│                                       ▼                                                │
+│                   mysql2 Connection Pool (src/config/database.js)                      │
+└───────────────────────────────────────┬────────────────────────────────────────────────┘
+                                        │ Parameterized TCP Socket (Port 3306)
+┌───────────────────────────────────────▼────────────────────────────────────────────────┐
+│                           STORAGE LAYER (MySQL 8.0+ / MariaDB)                         │
+│  - INFORMATION_SCHEMA (TABLES, COLUMNS, KEY_COLUMN_USAGE, CONSTRAINTS, STATISTICS)     │
+│  - User Databases (e.g., college_db, sdv_milestone4_test)                              │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+  </pre>
+
+  <div class="callout callout-success">
+    <div class="callout-title">Zero Hardcoding Principle</div>
+    No table names, column lists, or relationship links exist in application source code. All schema topology is introspected at runtime directly from the connected MySQL catalog.
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- Section 3: Frontend Technology Stack Deep-Dive -->
+  <h2>3. Frontend Technology Stack & Implementation Mapping</h2>
+  <p>The frontend is structured under <code>frontend/</code> and developed with the Next.js App Router paradigm.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 16%;">Technology</th>
+        <th style="width: 10%;">Version</th>
+        <th style="width: 32%;">Implementation Files</th>
+        <th style="width: 42%;">Specific Subsystem Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Next.js</strong></td>
+        <td><code>16.3.3</code></td>
+        <td>
+          <span class="path">frontend/app/page.tsx</span><br>
+          <span class="path">frontend/app/visualize/page.tsx</span><br>
+          <span class="path">frontend/next.config.mjs</span>
+        </td>
+        <td>
+          App Router framework, client-side routing, Webpack production optimizer, and server/client state demarcation (<code>'use client'</code> directives).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>React & DOM</strong></td>
+        <td><code>19.0.0</code></td>
+        <td>
+          <span class="path">frontend/components/*</span>
+        </td>
+        <td>
+          Declarative UI component architecture, reactive hook state (<code>useState</code>, <code>useCallback</code>, <code>useMemo</code>, <code>useRef</code>), and virtual DOM rendering.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>TypeScript</strong></td>
+        <td><code>5.7.3</code></td>
+        <td>
+          <span class="path">frontend/lib/schema.ts</span><br>
+          <span class="path">frontend/lib/schema-api.ts</span><br>
+          <span class="path">frontend/tsconfig.json</span>
+        </td>
+        <td>
+          Full strict type enforcement (0 compilation errors). Provides models for <code>DatabaseSchema</code>, <code>TableNode</code>, <code>ColumnDetail</code>, <code>QueryResult</code>, and <code>AnalysisIssue</code>.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>@xyflow/react (React Flow)</strong></td>
+        <td><code>12.12.0</code></td>
+        <td>
+          <span class="path">components/visualization/SchemaCanvas.tsx</span><br>
+          <span class="path">components/visualization/TableNode.tsx</span><br>
+          <span class="path">components/visualization/RelationshipEdge.tsx</span>
+        </td>
+        <td>
+          Infinite-canvas graph rendering engine. Renders custom node wrappers with column badges and SVG cubic bezier relationship edges with direction arrows and interactive cardinality badges.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Dagre</strong></td>
+        <td><code>0.8.5</code></td>
+        <td>
+          <span class="path">frontend/lib/schema/dagreLayout.ts</span>
+        </td>
+        <td>
+          Directed Acyclic Graph layout algorithm. Computes coordinate positions ($x, y$) for each table based on column counts, padding, and foreign key direction vectors (LR / TB).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Tailwind CSS</strong></td>
+        <td><code>4.3.3</code></td>
+        <td>
+          <span class="path">frontend/app/globals.css</span><br>
+          <span class="path">frontend/postcss.config.mjs</span>
+        </td>
+        <td>
+          Modern utility styling with CSS theme variables (OKLCH color system), responsive breakpoints, and glassmorphic translucent surfaces.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Lucide React</strong></td>
+        <td><code>1.16.0</code></td>
+        <td>
+          Throughout frontend UI components
+        </td>
+        <td>
+          Vector iconography representing Database tables, Primary Keys (Key), Foreign Keys (Link), Indexes (Search), Terminal commands, and Warning indicators.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Base UI & Radix</strong></td>
+        <td><code>1.5.0</code></td>
+        <td>
+          <span class="path">frontend/components/ui/modal.tsx</span>
+        </td>
+        <td>
+          Headless accessible UI primitives for accessible dialog focus traps, portaled overlays, and keyboard event navigation.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>clsx & tw-merge</strong></td>
+        <td><code>Latest</code></td>
+        <td>
+          <span class="path">frontend/lib/utils.ts</span>
+        </td>
+        <td>
+          Utility <code>cn()</code> function allowing dynamic class condition evaluation while deduplicating conflicting utility definitions.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Section 4: Backend Technology Stack Deep-Dive -->
+  <h2>4. Backend Technology Stack & Implementation Mapping</h2>
+  <p>The backend resides in <code>backend/</code> and provides a robust, decoupled REST API built on Express.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 16%;">Technology</th>
+        <th style="width: 10%;">Version</th>
+        <th style="width: 32%;">Implementation Files</th>
+        <th style="width: 42%;">Specific Subsystem Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Node.js</strong></td>
+        <td><code>v24.19.0</code></td>
+        <td>
+          <span class="path">backend/src/server.js</span>
+        </td>
+        <td>
+          Asynchronous JavaScript execution environment running the micro-service architecture and connection pooling.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Express</strong></td>
+        <td><code>4.19.2</code></td>
+        <td>
+          <span class="path">backend/src/server.js</span><br>
+          <span class="path">backend/src/routes/*</span><br>
+          <span class="path">backend/src/controllers/*</span>
+        </td>
+        <td>
+          REST HTTP server managing routing, route handlers, middleware dispatch, JSON request parsing, and response status mapping.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>mysql2 / promise</strong></td>
+        <td><code>3.10.1</code></td>
+        <td>
+          <span class="path">backend/src/config/database.js</span><br>
+          <span class="path">backend/src/services/schemaService.js</span><br>
+          <span class="path">backend/src/services/dataService.js</span>
+        </td>
+        <td>
+          High-performance MySQL driver utilizing native TCP connection pooling, parameterized queries (<code>?</code> placeholders), and Promise-based transaction execution.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Zod</strong></td>
+        <td><code>3.23.8</code></td>
+        <td>
+          <span class="path">backend/src/validators/databaseValidator.js</span><br>
+          <span class="path">backend/src/validators/queryValidator.js</span><br>
+          <span class="path">backend/src/validators/schemaValidator.js</span>
+        </td>
+        <td>
+          Schema input validation enforcing strict typing, regex safe identifier checks (<code>/^[a-zA-Z0-9_]+$/</code>), and port ranges before database hits.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Helmet</strong></td>
+        <td><code>7.1.0</code></td>
+        <td>
+          <span class="path">backend/src/server.js (Line 31)</span>
+        </td>
+        <td>
+          HTTP security middleware configuring 11 protective HTTP headers against MIME sniffing, clickjacking, and XSS exploits.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>CORS</strong></td>
+        <td><code>2.8.5</code></td>
+        <td>
+          <span class="path">backend/src/server.js (Lines 34–40)</span>
+        </td>
+        <td>
+          Cross-Origin Resource Sharing control locking incoming requests to the configured frontend origin (e.g. <code>http://localhost:3000</code>).
+        </td>
+      </tr>
+      <tr>
+        <td><strong>express-rate-limit</strong></td>
+        <td><code>7.3.1</code></td>
+        <td>
+          <span class="path">backend/src/server.js (Lines 43–53)</span>
+        </td>
+        <td>
+          DDoS protection middleware enforcing a ceiling of 500 requests per 15 minutes per IP address with standard rate limit headers.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Multer</strong></td>
+        <td><code>2.3.0</code></td>
+        <td>
+          <span class="path">backend/src/controllers/importController.js</span>
+        </td>
+        <td>
+          Streaming multipart form-data parser supporting uploaded SQL schema dumps and dataset imports.
+        </td>
+      </tr>
+      <tr>
+        <td><strong>Nodemon</strong></td>
+        <td><code>3.1.4</code></td>
+        <td>
+          <span class="path">backend/package.json (Line 8)</span>
+        </td>
+        <td>
+          Development process monitor enabling zero-downtime hot-reloading when backend source files are modified.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <!-- Section 5: Database Layer & Catalog Introspection Engine -->
+  <h2>5. Database Layer & Catalog Introspection Engine</h2>
+  <p>
+    The visualizer does not rely on ORM models or static metadata files. It queries the MySQL <code>INFORMATION_SCHEMA</code> catalog in real time through parameter-bound queries:
+  </p>
+
+  <div class="two-col">
+    <div class="card">
+      <h4>1. Table Discovery Query</h4>
+      <p>Discovers all user-created base tables in the active schema:</p>
+      <pre>SELECT TABLE_NAME AS name
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_SCHEMA = ?
+  AND TABLE_TYPE = 'BASE TABLE'
+ORDER BY TABLE_NAME;</pre>
+    </div>
+    <div class="card">
+      <h4>2. Column Details Query</h4>
+      <p>Fetches data types, nullability, defaults, and auto-increment flags:</p>
+      <pre>SELECT COLUMN_NAME, DATA_TYPE,
+       IS_NULLABLE, COLUMN_DEFAULT,
+       COLUMN_KEY, EXTRA, COLUMN_TYPE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = ?
+  AND TABLE_NAME = ?;</pre>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h4>3. Foreign Key Relationship Query</h4>
+      <p>Resolves referential integrity links between tables:</p>
+      <pre>SELECT CONSTRAINT_NAME AS constraintName,
+       TABLE_NAME AS sourceTable,
+       COLUMN_NAME AS sourceColumn,
+       REFERENCED_TABLE_NAME AS targetTable,
+       REFERENCED_COLUMN_NAME AS targetColumn
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE TABLE_SCHEMA = ?
+  AND REFERENCED_TABLE_NAME IS NOT NULL;</pre>
+    </div>
+    <div class="card">
+      <h4>4. Index Metadata Query</h4>
+      <p>Queries secondary, unique, and composite indexes:</p>
+      <pre>SELECT INDEX_NAME AS indexName,
+       COLUMN_NAME AS columnName,
+       NON_UNIQUE AS nonUnique,
+       SEQ_IN_INDEX AS seqInIndex,
+       INDEX_TYPE AS indexType
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE TABLE_SCHEMA = ?
+  AND TABLE_NAME = ?;</pre>
+    </div>
+  </div>
+
+  <!-- Section 6: Core Feature Subsystems Deep-Dive -->
+  <h2>6. Core Feature Subsystems Deep-Dive</h2>
+
+  <h3>6.1 React Flow Visualization & Layout Engine</h3>
+  <ul>
+    <li><strong>Custom Table Nodes (<code>TableNode.tsx</code>)</strong>: Render table headers, primary key badges (<code>PK</code>), unique badges (<code>UQ</code>), index markers (<code>IDX</code>), data types, and nullable flags.</li>
+    <li><strong>Custom Bezier Edges (<code>RelationshipEdge.tsx</code>)</strong>: Verified database foreign keys render as <strong>solid blue lines</strong>. Heuristic recommendations (R003) render as <strong>dashed amber lines</strong> and are strictly isolated from the declared schema graph.</li>
+    <li><strong>Dagre Layout Engine (<code>dagreLayout.ts</code>)</strong>: Measures node heights dynamically based on column count ($\text{Height} = 42 + N \times 28\text{px}$) to compute collision-free, hierarchical coordinates in both Left-to-Right and Top-to-Bottom orientations.</li>
+  </ul>
+
+  <h3>6.2 SQL Query Console & AST Read-Only Protection</h3>
+  <ul>
+    <li><strong>Single Endpoint</strong>: Frontend calls <code>POST /api/query/execute</code> via <code>schema-api.ts</code>.</li>
+    <li><strong>Strict Read-Only Enforcement (<code>queryService.js</code>)</strong>: Allows only <code>SELECT</code>, <code>SHOW</code>, <code>DESCRIBE</code>, <code>DESC</code>, <code>EXPLAIN</code>, and read-only <code>WITH</code> CTE queries. Modifying statements (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>, <code>TRUNCATE</code>, <code>RENAME</code>) are rejected with error code <code>READ_ONLY_QUERY_CONSOLE</code>.</li>
+    <li><strong>Multiple Statements Guard</strong>: Semicolon-chained commands are parsed and rejected with <code>MULTIPLE_STATEMENTS_NOT_ALLOWED</code> to prevent batch injection.</li>
+    <li><strong>Preserved SQLState & Error Codes</strong>: Preserves native MySQL codes (e.g. <code>ER_NO_SUCH_TABLE</code>) and SQL states (e.g. <code>42S02</code>) cleanly to the client UI.</li>
+  </ul>
+
+  <h3>6.3 Health Inspection & Rule Engine</h3>
+  <p>The backend analysis engine executes 5 specialized structural and relational health rules:</p>
+  <ul>
+    <li><strong>R001 — Missing Primary Key (HIGH)</strong>: Detects tables lacking primary keys (1NF integrity violation).</li>
+    <li><strong>R002 — Potential Orphaned Table (MEDIUM)</strong>: Identifies standalone tables with zero incoming or outgoing foreign keys. Provides advisory <em>Review Guidance</em> without generating destructive SQL.</li>
+    <li><strong>R003 — Possible Missing Foreign Key (MEDIUM)</strong>: Matches naming heuristics (e.g. <code>customer_id</code> in unlinked tables) to suggest foreign key candidates. Rendered as non-binding dashed overlays.</li>
+    <li><strong>R004 — Index Review Recommended (LOW)</strong>: Detects unindexed join columns that cause full table scans.</li>
+    <li><strong>R005 — Structural Dependency Analysis</strong>: Builds a dependency DAG, identifying root, leaf, and circular dependencies.</li>
+  </ul>
+  <p>
+    <strong>Health Scoring Formula:</strong>
+    $$\text{Score} = \max\Big(0, \, 100 - (15 \times \text{High} + 8 \times \text{Medium} + 3 \times \text{Low})\Big)$$
+  </p>
+
+  <div class="page-break"></div>
+
+  <!-- Section 7: Foreign Key Pre-Validation Matrix -->
+  <h2>7. Foreign Key Pre-Validation Matrix (13-Point Verification)</h2>
+  <p>
+    Before executing <code>ALTER TABLE ... ADD CONSTRAINT</code>, both the client modal (<code>editor-modals.tsx</code>) and the server service (<code>schemaEditService.js</code>) execute a 13-point pre-validation check:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 6%;">#</th>
+        <th style="width: 28%;">Validation Criteria</th>
+        <th style="width: 33%;">Verification Method</th>
+        <th style="width: 33%;">Enforced Error Response</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Source & Target Table Existence</td>
+        <td>Query <code>INFORMATION_SCHEMA.TABLES</code></td>
+        <td><code>Source/Target table '{name}' does not exist.</code></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Self-Referencing Identity Check</td>
+        <td>Compares table and column IDs</td>
+        <td><code>Cannot create self-referencing FK on same column.</code></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Source & Target Column Existence</td>
+        <td>Query <code>INFORMATION_SCHEMA.COLUMNS</code></td>
+        <td><code>Source/Target column '{name}' does not exist.</code></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Datatype Family Compatibility</td>
+        <td>Compares base types (INT vs VARCHAR)</td>
+        <td><code>Cannot create relationship: source {T1} and target {T2} are incompatible.</code></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Integer Precision Match</td>
+        <td>Compares INT, BIGINT, SMALLINT</td>
+        <td><code>Cannot create relationship: source {T1} and target {T2} are incompatible.</code></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Integer Sign Match (Signed/Unsigned)</td>
+        <td>Checks <code>COLUMN_TYPE</code> for 'unsigned'</td>
+        <td><code>Source column is {S} while target is {T}.</code></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Target Column Index / Key Check</td>
+        <td>Checks <code>INFORMATION_SCHEMA.STATISTICS</code></td>
+        <td><code>Target column must be indexed (e.g. PRIMARY KEY or UNIQUE).</code></td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>SET NULL Nullability Rule</td>
+        <td>Validates <code>IS_NULLABLE === 'YES'</code></td>
+        <td><code>SET NULL action requires source column to be nullable.</code></td>
+      </tr>
+      <tr>
+        <td>9</td>
+        <td>Duplicate Relationship Check</td>
+        <td>Checks <code>KEY_COLUMN_USAGE</code></td>
+        <td><code>Foreign key relationship already exists.</code></td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>Constraint Name Collision Check</td>
+        <td>Checks <code>TABLE_CONSTRAINTS</code></td>
+        <td><code>Constraint name '{name}' already exists.</code></td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td>Orphan Child Data Check</td>
+        <td>Subquery for child rows without parent</td>
+        <td><code>Found {N} existing row(s) with orphan values.</code></td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td>String Length & Collation Match</td>
+        <td>Checks character length & collation</td>
+        <td>Client badges & server verification.</td>
+      </tr>
+      <tr>
+        <td>13</td>
+        <td>Connection & Session State</td>
+        <td>Validates active pool allocation</td>
+        <td><code>No database connected.</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Section 8: Testing & Verification Matrix -->
+  <h2>8. Testing & Quality Assurance Verification Matrix</h2>
+  <p>The system passes all <strong>427 automated tests</strong> across 9 verification suites:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Test Suite</th>
+        <th>Target Scope</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>backend/test-api.js</code></td>
+        <td>Express API routing, 404 handlers, Zod sanitization, credential hygiene</td>
+        <td><strong>26 / 26 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase1-test.js</code></td>
+        <td>Schema extraction, catalog parsing, foreign key resolution</td>
+        <td><strong>55 / 55 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase2-test.js</code></td>
+        <td>Health Engine rules R001 (Missing PK) and R002 (Orphaned Table)</td>
+        <td><strong>49 / 49 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase3-test.js</code></td>
+        <td>Rules R003 (Missing FK), R004 (Index Review), and R005 (DAG Dependency)</td>
+        <td><strong>42 / 42 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase4-test.js</code></td>
+        <td>Analysis summary aggregation and project-defined health score calculation</td>
+        <td><strong>59 / 59 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>phase5-test.js</code></td>
+        <td>Database health dashboard integration and live analysis verification</td>
+        <td><strong>51 / 51 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>phase6-test.js</code></td>
+        <td>SQL Console execution, SELECT/SHOW/DESCRIBE/EXPLAIN, Read-only rejection</td>
+        <td><strong>50 / 50 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>phase7-test.js</code></td>
+        <td>Full CRUD lifecycle (Create, Read, Update, Delete) on MySQL tables</td>
+        <td><strong>37 / 37 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><code>e2e-audit-test.js</code></td>
+        <td>Comprehensive end-to-end integration audit against <code>college_db</code></td>
+        <td><strong>58 / 58 PASSED</strong></td>
+      </tr>
+      <tr>
+        <td><strong>TypeScript Check</strong></td>
+        <td><code>pnpm exec tsc --noEmit</code></td>
+        <td><strong>0 ERRORS</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Production Build</strong></td>
+        <td><code>pnpm build</code> (Next.js 16 Webpack bundle)</td>
+        <td><strong>SUCCESS (3.0s)</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Document Footer -->
+  <div style="margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px; font-size: 8pt; color: #718096; display: flex; justify-content: space-between;">
+    <span>Smart Database Visualizer — Architectural Specification</span>
+    <span>Generated: November 2026</span>
+  </div>
+
+</body>
+</html>

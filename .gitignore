@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Next.js Build Output
+.next/
+*/.next/
+out/
+build/
+dist/
+
+# TypeScript Build Info
+*.tsbuildinfo
+*/tsconfig.tsbuildinfo
+
+# Environment variables & secrets (preserve .env.example)
+.env
+.env.local
+.env*.local
+*.env
+!.env.example
+!*/.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sandbox & Scratch directories
+scratch/
+*/scratch/
+.snowflake/
+.v0-trash/
+.vercel/

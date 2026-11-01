@@ -1,0 +1,68 @@
+{
+  "database": "sdv_milestone4_test",
+  "intentional_test_cases": [
+    {
+      "ruleId": "R001",
+      "rule": "MISSING_PRIMARY_KEY",
+      "table": "attendance_log",
+      "expectedSeverity": "HIGH",
+      "expectedRecommendation": "Add a primary key or suitable composite primary key."
+    },
+    {
+      "ruleId": "R002",
+      "rule": "ORPHANED_TABLE",
+      "table": "audit_notes",
+      "expectedSeverity": "MEDIUM",
+      "expectedRecommendation": "Review whether this table should be related to the main schema."
+    },
+    {
+      "ruleId": "R002",
+      "rule": "ORPHANED_TABLE",
+      "table": "customers",
+      "expectedSeverity": "MEDIUM",
+      "expectedRecommendation": "Review whether this table should be linked to orders; the missing customer foreign key makes it disconnected in the declared FK graph."
+    },
+    {
+      "ruleId": "R003",
+      "rule": "POSSIBLE_MISSING_FOREIGN_KEY",
+      "table": "students",
+      "column": "department_id",
+      "candidateReference": "departments.department_id",
+      "expectedSeverity": "MEDIUM",
+      "expectedRecommendation": "Review whether students.department_id should reference departments.department_id."
+    },
+    {
+      "ruleId": "R003",
+      "rule": "POSSIBLE_MISSING_FOREIGN_KEY",
+      "table": "orders",
+      "column": "customer_id",
+      "candidateReference": "customers.customer_id",
+      "expectedSeverity": "MEDIUM",
+      "expectedRecommendation": "Review whether orders.customer_id should reference customers.customer_id."
+    },
+    {
+      "ruleId": "R004",
+      "rule": "MISSING_OR_REVIEW_INDEX",
+      "table": "students",
+      "column": "department_id",
+      "expectedSeverity": "LOW",
+      "expectedRecommendation": "Review whether an index on students.department_id is useful for joins/filtering."
+    },
+    {
+      "ruleId": "R004",
+      "rule": "MISSING_OR_REVIEW_INDEX",
+      "table": "orders",
+      "column": "customer_id",
+      "expectedSeverity": "LOW",
+      "expectedRecommendation": "Review whether an index on orders.customer_id is useful for joins/filtering."
+    }
+  ],
+  "crud_table": "tasks",
+  "crud_checks": [
+    "Create a new task",
+    "Read task rows",
+    "Update task status",
+    "Delete a test task"
+  ],
+  "crud_notes": "The tasks table has a valid FK to students so it can be used for CRUD testing without being intentionally orphaned."
+}

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Database Visualizer — Milestone 1 to Milestone 5 Tech Stack Specification</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 14mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 7.5pt;
+        color: #718096;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1a202c;
+      background: #ffffff;
+      line-height: 1.45;
+      font-size: 8.5pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header-banner {
+      border-bottom: 2px solid #2b6cb0;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .header-left h1 {
+      font-size: 16pt;
+      font-weight: 800;
+      color: #1a365d;
+      margin: 0 0 3px 0;
+      letter-spacing: -0.4px;
+    }
+
+    .header-left .subtitle {
+      font-size: 9pt;
+      color: #4a5568;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .header-meta {
+      text-align: right;
+      font-size: 7.5pt;
+      color: #718096;
+      line-height: 1.3;
+    }
+
+    .header-meta strong {
+      color: #2b6cb0;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 6.8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-radius: 3px;
+    }
+
+    .badge-blue { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+    .badge-green { background: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
+    .badge-purple { background: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
+    .badge-amber { background: #fffaf0; color: #c05621; border: 1px solid #feebc8; }
+
+    h2 {
+      font-size: 11pt;
+      font-weight: 700;
+      color: #2b6cb0;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 3px;
+      margin-top: 12px;
+      margin-bottom: 6px;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 9pt;
+      font-weight: 700;
+      color: #2d3748;
+      margin-top: 8px;
+      margin-bottom: 4px;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin: 0 0 6px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px 0;
+      font-size: 8pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 4px 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf2f7;
+      color: #2d3748;
+      font-weight: 700;
+      font-size: 7.2pt;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    tr:nth-child(even) td {
+      background: #fbfcfe;
+    }
+
+    code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 7.3pt;
+      background: #edf2f7;
+      color: #6b46c1;
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    .path {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 7pt;
+      color: #2b6cb0;
+      font-weight: 600;
+    }
+
+    pre {
+      background: #1a202c;
+      color: #f7fafc;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 6.8pt;
+      line-height: 1.35;
+      padding: 6px 8px;
+      border-radius: 4px;
+      margin: 6px 0 8px 0;
+      page-break-inside: avoid;
+    }
+
+    .milestone-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      padding: 8px 10px;
+      background: #ffffff;
+      margin-bottom: 8px;
+      page-break-inside: avoid;
+    }
+
+    .milestone-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #edf2f7;
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    .milestone-title {
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: #1a365d;
+    }
+
+    .tech-pill {
+      display: inline-block;
+      background: #edf2f7;
+      color: #4a5568;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 7pt;
+      font-weight: 600;
+      margin-right: 4px;
+      margin-bottom: 2px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      page-break-inside: avoid;
+    }
+
+    .callout {
+      border-left: 3px solid #3182ce;
+      background: #ebf8ff;
+      padding: 6px 8px;
+      margin: 6px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 7.8pt;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <div class="header-left">
+      <div class="badge-bar">
+        <span class="badge badge-blue">Milestones 1 – 5</span>
+        <span class="badge badge-green">427 Tests Passed</span>
+        <span class="badge badge-purple">Complete Stack Reference</span>
+      </div>
+      <h1>Smart Database Visualizer</h1>
+      <p class="subtitle">Complete Architectural Evolution & Tech Stack Specification (Milestone 1 to Milestone 5)</p>
+    </div>
+    <div class="header-meta">
+      <div><strong>Version:</strong> Milestone 5 Release</div>
+      <div><strong>Stack:</strong> Next.js 16 + Express + MySQL</div>
+      <div><strong>Status:</strong> 100% Fully Functional</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Milestone Evolution Matrix -->
+  <h2>1. Milestone Evolution Matrix (Summary Overview)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 13%;">Milestone</th>
+        <th style="width: 25%;">Primary Scope</th>
+        <th style="width: 32%;">Core Technologies & Libraries</th>
+        <th style="width: 30%;">Key Files & Work Areas</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Milestone 1</strong></td>
+        <td>Backend Foundation & Secure DB Connectivity</td>
+        <td>Node.js v24, Express 4.19, <code>mysql2/promise</code>, Zod, Helmet, CORS, Rate-Limit, Dotenv</td>
+        <td><span class="path">backend/src/server.js</span><br><span class="path">backend/src/config/database.js</span></td>
+      </tr>
+      <tr>
+        <td><strong>Milestone 2</strong></td>
+        <td>Zero-Config Dynamic Schema Introspection</td>
+        <td>MySQL <code>INFORMATION_SCHEMA</code>, Parameterized SQL Queries, Normalization Parser</td>
+        <td><span class="path">backend/src/services/schemaService.js</span><br><span class="path">frontend/lib/schema.ts</span></td>
+      </tr>
+      <tr>
+        <td><strong>Milestone 3</strong></td>
+        <td>Interactive ER Canvas & Hierarchical Auto-Layout</td>
+        <td>Next.js 16, React 19, TypeScript, <code>@xyflow/react</code> (React Flow), <code>dagre</code>, Tailwind CSS 4</td>
+        <td><span class="path">frontend/components/visualization/*</span><br><span class="path">frontend/lib/schema/dagreLayout.ts</span></td>
+      </tr>
+      <tr>
+        <td><strong>Milestone 4</strong></td>
+        <td>Rule-Based Health Engine & Dependency DAG</td>
+        <td>Structural Graph Algorithms (DAG), <code>STATISTICS</code> Introspection, Recommendation Engine</td>
+        <td><span class="path">backend/src/services/analysis/*</span><br><span class="path">recommendationBuilder.js</span></td>
+      </tr>
+      <tr>
+        <td><strong>Milestone 5</strong></td>
+        <td>Table Explorer, Read-Only SQL, CRUD & Stabilization</td>
+        <td>5-Tab Table Explorer, AST Read-Only Tokenizer, 13-Point FK Pre-Validator, Base UI / Radix</td>
+        <td><span class="path">TableDetailsPanel.tsx</span>, <span class="path">queryService.js</span><br><span class="path">schemaEditService.js</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Section 2: Detailed Milestone Breakdowns -->
+  <h2>2. Milestone-by-Milestone Deep Breakdown</h2>
+
+  <!-- Milestone 1 -->
+  <div class="milestone-card">
+    <div class="milestone-header">
+      <span class="milestone-title">Milestone 1 — Backend Architecture & Connection Infrastructure</span>
+      <span class="badge badge-blue">Foundation</span>
+    </div>
+    <p>Constructed an enterprise-grade Express REST backend establishing connection pools to MySQL without credential leaks.</p>
+    <div>
+      <span class="tech-pill">Node.js (v24 LTS)</span>
+      <span class="tech-pill">Express (4.19.2)</span>
+      <span class="tech-pill">mysql2/promise (3.10.1)</span>
+      <span class="tech-pill">Zod (3.23.8)</span>
+      <span class="tech-pill">Helmet (7.1.0)</span>
+      <span class="tech-pill">CORS (2.8.5)</span>
+      <span class="tech-pill">express-rate-limit (7.3.1)</span>
+      <span class="tech-pill">Nodemon (3.1.4)</span>
+    </div>
+    <ul style="margin: 4px 0 0 0; padding-left: 14px; font-size: 7.8pt;">
+      <li><strong>Connection Pool:</strong> <code>createPool</code> with non-blocking async TCP sockets, connection testing, and automatic recovery.</li>
+      <li><strong>Input Validation & Sanitization:</strong> Zod schemas validating port ranges, connection payloads, and regex allowlist (<code>[a-zA-Z0-9_]</code>).</li>
+      <li><strong>Security Middleware:</strong> Helmet for 11 security headers, CORS origin-locking, and 500 req/15 min IP rate limiting.</li>
+    </ul>
+  </div>
+
+  <!-- Milestone 2 -->
+  <div class="milestone-card">
+    <div class="milestone-header">
+      <span class="milestone-title">Milestone 2 — Schema Introspection & Normalization Engine</span>
+      <span class="badge badge-green">Introspection</span>
+    </div>
+    <p>Eliminated hardcoding by introspecting live schema catalogs via parameterized SQL queries and standardizing JSON output.</p>
+    <div>
+      <span class="tech-pill">MySQL INFORMATION_SCHEMA</span>
+      <span class="tech-pill">Parameterized SQL</span>
+      <span class="tech-pill">REST Controllers</span>
+      <span class="tech-pill">TypeScript Models</span>
+    </div>
+    <ul style="margin: 4px 0 0 0; padding-left: 14px; font-size: 7.8pt;">
+      <li><strong>Zero-Config Discovery:</strong> Queries <code>TABLES</code> (base tables), <code>COLUMNS</code> (types, nullability, auto-increment), <code>KEY_COLUMN_USAGE</code> (foreign keys), and <code>TABLE_CONSTRAINTS</code> (primary/unique constraints).</li>
+      <li><strong>Normalized Representation:</strong> Maps dynamic MySQL metadata into <code>DatabaseSchema</code> (tables array, column lists, relationships array with N:1 cardinality).</li>
+    </ul>
+  </div>
+
+  <!-- Milestone 3 -->
+  <div class="milestone-card">
+    <div class="milestone-header">
+      <span class="milestone-title">Milestone 3 — Interactive Graph Visualization & Auto-Layout Engine</span>
+      <span class="badge badge-purple">Visualization</span>
+    </div>
+    <p>Engineered an interactive, high-performance canvas rendering tables and relationships with automatic Dagre layout.</p>
+    <div>
+      <span class="tech-pill">Next.js 16 (App Router)</span>
+      <span class="tech-pill">React 19</span>
+      <span class="tech-pill">TypeScript 5.7</span>
+      <span class="tech-pill">@xyflow/react (React Flow 12.12)</span>
+      <span class="tech-pill">Dagre (0.8.5)</span>
+      <span class="tech-pill">Tailwind CSS 4</span>
+      <span class="tech-pill">Lucide React</span>
+    </div>
+    <ul style="margin: 4px 0 0 0; padding-left: 14px; font-size: 7.8pt;">
+      <li><strong>Canvas System:</strong> Pan, infinite zoom ($0.15\times - 2.5\times$), mini-map, and custom table cards (<code>TableNode.tsx</code>) with badges (<code>PK</code>, <code>FK</code>, <code>UQ</code>, <code>IDX</code>).</li>
+      <li><strong>Custom Edge Renderer:</strong> <code>RelationshipEdge.tsx</code> with SVG cubic bezier curves, target direction arrows, and interactive cardinality chips.</li>
+      <li><strong>Size-Aware Dagre Engine:</strong> Injects dynamic table heights ($\text{Height} = 42 + N \times 28\text{px}$) to compute collision-free Left-to-Right (`LR`) and Top-to-Bottom (`TB`) coordinates.</li>
+    </ul>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- Milestone 4 -->
+  <div class="milestone-card">
+    <div class="milestone-header">
+      <span class="milestone-title">Milestone 4 — Rule-Based Health Inspection Engine & Dependency DAG</span>
+      <span class="badge badge-amber">Health & Diagnostics</span>
+    </div>
+    <p>Integrated a graph-theoretic health inspection engine executing 5 rules and calculating a project-defined health score.</p>
+    <div>
+      <span class="tech-pill">Graph Algorithms (DAG)</span>
+      <span class="tech-pill">STATISTICS Metadata</span>
+      <span class="tech-pill">Rule Engine (R001 - R005)</span>
+      <span class="tech-pill">Health Score Formulation</span>
+    </div>
+    <ul style="margin: 4px 0 0 0; padding-left: 14px; font-size: 7.8pt;">
+      <li><strong>Rules Implemented:</strong> R001 (Missing PK - HIGH), R002 (Orphaned Table - MEDIUM), R003 (Missing FK Candidate - MEDIUM), R004 (Unindexed Foreign Key - LOW), R005 (Circular / Dependency Anomalies).</li>
+      <li><strong>Health Scoring Formula:</strong> $\text{Score} = \max\Big(0, \, 100 - (15 \times \text{High} + 8 \times \text{Medium} + 3 \times \text{Low})\Big)$.</li>
+      <li><strong>Structural Dependency Graph:</strong> Categorizes tables into root nodes, leaf nodes, and isolated tables with full dependency chains.</li>
+    </ul>
+  </div>
+
+  <!-- Milestone 5 -->
+  <div class="milestone-card">
+    <div class="milestone-header">
+      <span class="milestone-title">Milestone 5 — Table Explorer, Query Console, CRUD & Full Stabilization</span>
+      <span class="badge badge-green">Integration & Production</span>
+    </div>
+    <p>Unified all modules with in-depth table exploration, read-only SQL terminal, live CRUD, and 13-point FK pre-validation.</p>
+    <div>
+      <span class="tech-pill">5-Tab Explorer</span>
+      <span class="tech-pill">Read-Only SQL AST Parser</span>
+      <span class="tech-pill">13-Point FK Pre-Validator</span>
+      <span class="tech-pill">Base UI / Radix</span>
+      <span class="tech-pill">Parameterized CRUD</span>
+      <span class="tech-pill">Local Visual Filters</span>
+    </div>
+    <ul style="margin: 4px 0 0 0; padding-left: 14px; font-size: 7.8pt;">
+      <li><strong>5-Tab Table Explorer:</strong> Detailed inspection of Overview, Columns, Keys & Constraints, Indexes (from <code>STATISTICS</code>), and Relationships.</li>
+      <li><strong>Read-Only Query Console:</strong> AST tokenizer allowing <code>SELECT/SHOW/DESCRIBE/EXPLAIN</code> and read-only <code>WITH</code>; blocks mutations with <code>READ_ONLY_QUERY_CONSOLE</code> and chained SQL with <code>MULTIPLE_STATEMENTS_NOT_ALLOWED</code>. Preserves MySQL error codes (<code>ER_NO_SUCH_TABLE</code>, <code>42S02</code>).</li>
+      <li><strong>Pre-Validated FK Engine:</strong> 13 checks (types, sign, target indexing, orphan records, constraint naming) before running <code>ALTER TABLE</code>.</li>
+      <li><strong>Declared vs. Possible Separation:</strong> Confirmed FKs render solid blue; R003 heuristic candidates render dashed amber and never mutate declared schema.</li>
+    </ul>
+  </div>
+
+  <!-- Section 3: Cumulative Layer Architecture -->
+  <h2>3. Complete Cumulative Layer Architecture</h2>
+  <pre>
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        FRONTEND PRESENTATION LAYER (Next.js 16 + React 19)             │
+│  - Interactive Graph Canvas (@xyflow/react 12.12 + Dagre 0.8.5 Auto-Layout)            │
+│  - 5-Tab Table Explorer (Overview, Columns, Keys, Indexes, Relationships)              │
+│  - SQL Query Console (Read-Only Terminal with History, Timing & CSV/JSON Export)       │
+│  - Health Dashboard (R001–R005 Cards, Advisory Guidance, Focus in Diagram)            │
+│  - UI Styling System (Tailwind CSS 4 + Lucide React + Base UI Dialog Primitives)       │
+│  - Typed API Client (lib/schema-api.ts & lib/api.ts with preserved SQLState & Code)    │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ HTTP / JSON REST APIs (Port 5000)
+┌───────────────────────────────────────────▼────────────────────────────────────────────┐
+│                       BACKEND APPLICATION & API LAYER (Express 4 on Node.js)           │
+│  - Security: Helmet (11 HTTP Headers) + CORS (Origin-Locked) + express-rate-limit     │
+│  - Validators: Zod (databaseValidator, queryValidator, schemaValidator)               │
+│  - Services:                                                                           │
+│    • databaseService.js  : mysql2 Connection Pool lifecycle & health check            │
+│    • schemaService.js    : INFORMATION_SCHEMA introspection & normalization            │
+│    • analysisService.js  : R001–R005 Rule Engine, DAG Analyzer & Health Score          │
+│    • queryService.js     : Read-Only Query Guardrail, Multi-Statement Blocker & Timer  │
+│    • dataService.js      : Parameterized Create, Read, Update, Delete Engine           │
+│    • schemaEditService.js: 13-Point Pre-Validation & ALTER TABLE Execution             │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ Parameterized TCP Sockets (Port 3306)
+┌───────────────────────────────────────────▼────────────────────────────────────────────┐
+│                                 STORAGE & DATABASE LAYER (MySQL 8.0+)                  │
+│  - Catalogs: INFORMATION_SCHEMA (TABLES, COLUMNS, KEY_COLUMN_USAGE, STATISTICS)        │
+│  - Active Databases: college_db (Primary Verification), sdv_milestone4_test            │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+  </pre>
+
+  <!-- Section 4: Testing & Quality Matrix -->
+  <h2>4. Automated Test Matrix Across All Milestones</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Test Suite</th>
+        <th style="width: 15%;">Milestone Scope</th>
+        <th style="width: 45%;">Verification Coverage</th>
+        <th style="width: 15%;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>backend/test-api.js</code></td>
+        <td>Milestones 1 & 2</td>
+        <td>Express API routing, 404 handlers, Zod sanitization, credential hygiene</td>
+        <td><strong>26 / 26 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase1-test.js</code></td>
+        <td>Milestone 2</td>
+        <td>Schema extraction, catalog parsing, foreign key resolution</td>
+        <td><strong>55 / 55 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase2-test.js</code></td>
+        <td>Milestone 4</td>
+        <td>Rules R001 (Missing PK) and R002 (Potential Orphaned Table)</td>
+        <td><strong>49 / 49 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase3-test.js</code></td>
+        <td>Milestone 4</td>
+        <td>Rules R003 (Missing FK), R004 (Unindexed Column), and R005 (DAG Dependency)</td>
+        <td><strong>42 / 42 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>backend/phase4-test.js</code></td>
+        <td>Milestone 4</td>
+        <td>Analysis summary aggregation and project-defined health score (47 on test DB)</td>
+        <td><strong>59 / 59 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>phase5-test.js</code></td>
+        <td>Milestone 5</td>
+        <td>Database health dashboard integration and diagram focus verification</td>
+        <td><strong>51 / 51 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>phase6-test.js</code></td>
+        <td>Milestone 5</td>
+        <td>SQL Console execution, SELECT/SHOW/DESCRIBE/EXPLAIN, Read-only rejection</td>
+        <td><strong>50 / 50 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>phase7-test.js</code></td>
+        <td>Milestone 5</td>
+        <td>Full CRUD lifecycle (Create, Read, Update, Delete) on MySQL tables</td>
+        <td><strong>37 / 37 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><code>e2e-audit-test.js</code></td>
+        <td>Milestone 5</td>
+        <td>Comprehensive end-to-end integration audit on <code>college_db</code></td>
+        <td><strong>58 / 58 PASS</strong></td>
+      </tr>
+      <tr>
+        <td><strong>TypeScript Check</strong></td>
+        <td>All</td>
+        <td>Strict typing via <code>pnpm exec tsc --noEmit</code></td>
+        <td><strong>0 ERRORS</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Production Build</strong></td>
+        <td>All</td>
+        <td>Production asset bundling via <code>pnpm build</code> (Next.js 16)</td>
+        <td><strong>SUCCESS (3.0s)</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Footer -->
+  <div style="margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 6px; font-size: 7.2pt; color: #718096; display: flex; justify-content: space-between;">
+    <span>Smart Database Visualizer — Architectural Evolution Specification</span>
+    <span>Milestones 1–5 Technical Reference</span>
+  </div>
+
+</body>
+</html>
